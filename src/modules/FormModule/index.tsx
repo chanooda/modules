@@ -25,9 +25,13 @@ export function useCustomForm<FormData>(
   inValidCustomFn: (errMessage?: string) => void,
   onClicks?: IOnClicks
 ) {
-  const { register, watch, handleSubmit, setValue } = useForm<
-    FormData & FieldValues
-  >();
+  const {
+    register,
+    watch,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<FormData & FieldValues>();
 
   let inputSetObj: { [name: string]: JSX.Element } = {};
   const inputSetList: JSX.Element[] = [];
@@ -51,7 +55,17 @@ export function useCustomForm<FormData>(
         name={el.name}
         buttonText={el.buttonText}
         type={el.type}
-        onClick={onClicks && onClicks[el.name as string]}
+        onClick={
+          onClicks &&
+          (() => {
+            const value = watch(el.name);
+            if (!value) {
+              inValidCustomFn(`${el.label}을 입력해주세요.`);
+              return;
+            }
+            onClicks[el.name as string]();
+          })
+        }
       />
     );
   });
@@ -75,6 +89,7 @@ export function useCustomForm<FormData>(
     inputList: inputSetList,
     onSubmit: handleSubmit(onValid, inValid),
     watch,
+    errors,
   };
 }
 

@@ -1,12 +1,12 @@
 import React from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import styled from 'styled-components';
-import { IInputs, useCustomForm } from './FormHook';
+import { IInputs, useCustomForm } from './modules/FormModule';
 
 interface ISignupInput {
   id: string;
   name: string;
-  password: string;
+  passwordCheck: string;
   phone: string;
   email: string;
   [key: string]: string;
@@ -15,7 +15,7 @@ interface ISignupInput {
 const inputs: IInputs<ISignupInput>[] = [
   { name: 'id', label: '아이디', type: 'text', buttonText: '중복 확인' },
   { name: 'password', label: '비밀번호', type: 'password' },
-  { name: 'passwordCheck', label: '비밀번호 확인', type: 'text' },
+  { name: 'passwordCheck', label: '비밀번호 확인', type: 'password' },
   { name: 'name', label: '이름', type: 'text' },
   { name: 'phone', label: '전화번호', type: 'text', buttonText: '본인 인증' },
   { name: 'email', label: '이메일', type: 'text', buttonText: '이메일 인증' },
@@ -23,8 +23,8 @@ const inputs: IInputs<ISignupInput>[] = [
 
 function App() {
   const onValid: SubmitHandler<ISignupInput> = (formData) => {
-    const { password, passwordConfirm } = formData;
-    if (password !== passwordConfirm) {
+    const { password, passwordCheck } = formData;
+    if (password !== passwordCheck) {
       console.log('비밀번호 같지 않음');
       return;
     }
@@ -45,8 +45,8 @@ function App() {
       console.log(watch('phone'));
     },
     email() {
-      watch('phone');
-      console.log(watch('phone'));
+      watch('email');
+      console.log(watch('email'));
     },
   };
 
@@ -66,9 +66,6 @@ function App() {
           ))}
           <button>회원가입</button>
         </AppContainer>
-        <>
-          ============================================================================================
-        </>
       </form>
     </>
   );
@@ -83,6 +80,7 @@ const AppContainer = styled.div`
   gap: 20px;
   > button {
     height: 35px;
+    margin-top: 15px;
     border: none;
     background-color: #39a6f0;
     border-radius: 5px;
