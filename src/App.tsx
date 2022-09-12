@@ -50,12 +50,8 @@ function App() {
     },
   };
 
-  const { input, inputList, onSubmit, watch } = useCustomForm<ISignupInput>(
-    inputs,
-    onValid,
-    customInValid,
-    onClicks
-  );
+  const { input, inputList, onSubmit, watch, setValue } =
+    useCustomForm<ISignupInput>(inputs, onValid, customInValid, onClicks);
 
   return (
     <>
