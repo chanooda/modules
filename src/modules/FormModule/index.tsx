@@ -1,13 +1,4 @@
-import {
-  FieldValues,
-  Path,
-  UseFormRegister,
-  useForm,
-  SubmitHandler,
-  SubmitErrorHandler,
-} from 'react-hook-form';
-import styled from 'styled-components';
-import { InputSet } from './InputSet';
+import { FieldValues, Path, useForm, SubmitHandler, SubmitErrorHandler } from "react-hook-form";
 
 interface IOnClicks {
   [key: string]: () => void;
@@ -16,7 +7,7 @@ interface IOnClicks {
 export interface IInputs<FormData> {
   name: Path<FormData & FieldValues>;
   label: string;
-  type: 'text' | 'password';
+  type: "text" | "password";
   buttonText?: string;
 }
 
@@ -24,33 +15,18 @@ export function useCustomForm<FormData>(
   inputs: IInputs<FormData>[],
   onValid: SubmitHandler<FormData & FieldValues>,
   inValidCustomFn: (errMessage?: string) => void,
+  InputComponent?: any,
   onClicks?: IOnClicks
 ) {
-  const {
-    register,
-    watch,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<FormData & FieldValues>();
+  const { register, ...formMethods } = useForm<FormData & FieldValues>();
 
-  let inputSetObj: { [name: string]: JSX.Element } = {};
+  const inputSetObj: { [name: string]: JSX.Element } = {};
   const inputSetList: JSX.Element[] = [];
 
   // 인풋 컴포넌트 생성
   inputs.forEach((el) => {
     inputSetObj[el.name as string] = (
-      <InputSet
-        register={register}
-        label={el.label}
-        name={el.name}
-        buttonText={el.buttonText}
-        type={el.type}
-        onClick={onClicks && onClicks[el.name as string]}
-      />
-    );
-    inputSetList.push(
-      <InputSet
+      <InputComponent
         register={register}
         label={el.label}
         name={el.name}
@@ -59,7 +35,28 @@ export function useCustomForm<FormData>(
         onClick={
           onClicks &&
           (() => {
-            const value = watch(el.name);
+            const value = formMethods.watch(el.name);
+            if (!value) {
+              inValidCustomFn(`${el.label}을 입력해주세요.`);
+              return;
+            }
+            onClicks[el.name as string]();
+          })
+        }
+      />
+    ) || <></>;
+
+    inputSetList.push(
+      <InputComponent
+        register={register}
+        label={el.label}
+        name={el.name}
+        buttonText={el.buttonText}
+        type={el.type}
+        onClick={
+          onClicks &&
+          (() => {
+            const value = formMethods.watch(el.name);
             if (!value) {
               inValidCustomFn(`${el.label}을 입력해주세요.`);
               return;
@@ -75,8 +72,7 @@ export function useCustomForm<FormData>(
     if (errors) {
       inputs.every((el) => {
         if (errors[el.name as string]) {
-          if (inValidCustomFn)
-            inValidCustomFn(errors[el.name as string]?.message as string);
+          if (inValidCustomFn) inValidCustomFn(errors[el.name as string]?.message as string);
           return false;
         } else {
           return true;
@@ -88,9 +84,11 @@ export function useCustomForm<FormData>(
   return {
     input: inputSetObj,
     inputList: inputSetList,
-    onSubmit: handleSubmit(onValid, inValid),
-    watch,
-    errors,
-    setValue,
+    onSubmit: formMethods.handleSubmit(onValid, inValid),
+    formMethods,
   };
 }
+
+const Wrap = ({ children }: { children: JSX.Element }) => {
+  return <>{children}</>;
+};
